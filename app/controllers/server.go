@@ -14,6 +14,10 @@ type HealthCheck struct {
 // ルーティング設定
 func SetRouter() {
 	http.HandleFunc("/health_check", healthCheck)
+
+	// ショップ
+	http.HandleFunc("/v1/shops", shopsHandler)
+	http.HandleFunc("/v1/shops/", shopsIdHandler)
 }
 
 // サーバーを起動する

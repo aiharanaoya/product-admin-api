@@ -16,8 +16,8 @@ func SetRouter() {
 	http.HandleFunc("/health_check", healthCheck)
 
 	// ショップ
-	http.HandleFunc("/v1/shops", shopsHandler)
-	http.HandleFunc("/v1/shops/", shopsIdHandler)
+	http.HandleFunc("/api/shops", shopsHandler)
+	http.HandleFunc("/api/shops/", shopsIdHandler)
 }
 
 // サーバーを起動する

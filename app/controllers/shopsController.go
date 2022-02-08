@@ -17,9 +17,8 @@ func shopsHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		postShop()
 	default:
-		// TODO aiharanaoya
-		// 仮で500のStatusTextを返している。今後エラーハンドリングを実装。
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		// 仮エラーハンドリング
+		http.Error(w, "仮エラー", http.StatusInternalServerError)
 	}
 }
 
@@ -33,9 +32,8 @@ func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		deleteShopById()
 	default:
-		// TODO aiharanaoya
-		// 仮で500のStatusTextを返している。今後エラーハンドリングを実装。
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		// 仮エラーハンドリング
+		http.Error(w, "仮エラー", http.StatusInternalServerError)
 	}
 }
 

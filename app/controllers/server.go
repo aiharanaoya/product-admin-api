@@ -42,6 +42,7 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, string(healthCheckRes))
 	} else {
-		fmt.Println("ヘルスチェック エラー")
+		// 仮エラーハンドリング
+		http.Error(w, "仮エラー", http.StatusInternalServerError)
 	}
 }

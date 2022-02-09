@@ -9,11 +9,11 @@ import (
 
 // ショップ構造体
 type Shop struct {
-	Id      		string 		`json:"id"`
-	Name   			string 		`json:"name"`
-	Description string 		`json:"description"`
-	CreatedAt 	time.Time `json:"createdAt"`
-	UpdatedAt 	time.Time `json:"updatedAt"`
+	Id	string	`json:"id"`
+	Name	string	`json:"name"`
+	Description	string	`json:"description"`
+	CreatedAt	time.Time	`json:"createdAt"`
+	UpdatedAt	time.Time	`json:"updatedAt"`
 }
 
 // IDからショップ1件を取得する

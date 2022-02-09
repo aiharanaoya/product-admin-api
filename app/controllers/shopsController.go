@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/nao11aihara/product-admin-api/app/models"
 )
 
 // ハンドラ関数
@@ -34,7 +37,7 @@ func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		getShopById()
+		getShopById(w, id)
 	case http.MethodPut:
 		putShopById()
 	case http.MethodDelete:
@@ -61,8 +64,19 @@ func postShop() {
 }
 
 // ショップ取得
-func getShopById() {
-	fmt.Println("ショップ取得処理")
+func getShopById(w http.ResponseWriter, id string) {
+	shop, err := models.FetchShopById(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	shopRes, err := json.Marshal(shop)
+	if err != nil {
+			fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(shopRes))
 }
 
 // ショップ更新
@@ -74,6 +88,8 @@ func putShopById() {
 func deleteShopById() {
 	fmt.Println("ショップ削除処理")
 }
+
+// ロジック切り出し
 
 // ショップのパスパラメータを取得する
 func getShopPathParameter(r *http.Request) string {

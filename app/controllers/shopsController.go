@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // ハンドラ関数
@@ -24,6 +25,13 @@ func shopsHandler(w http.ResponseWriter, r *http.Request) {
 
 // ショップIDハンドラ
 func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
+	id := getShopPathParameter(r)
+
+	if(id == "") {
+		// 仮エラーハンドリング
+		http.Error(w, "仮エラー", http.StatusInternalServerError)
+	}
+
 	switch r.Method {
 	case http.MethodGet:
 		getShopById()
@@ -65,4 +73,15 @@ func putShopById() {
 // ショップ削除
 func deleteShopById() {
 	fmt.Println("ショップ削除処理")
+}
+
+// ショップのパスパラメータを取得する
+func getShopPathParameter(r *http.Request) string {
+	urls := strings.Split(r.RequestURI, "/")
+
+	if(len(urls) < 4) {
+		return ""
+	}
+
+	return urls[3]
 }

@@ -56,3 +56,16 @@ func (s *Shop) CreateShop() (id string, err error) {
 
 	return id, err
 }
+
+// 指定IDのショップを更新する
+func (s *Shop) UpdateShopById() (err error) {
+	cmd := `
+		update shops
+		set name = ?, description = ?
+		where id = ? 
+	`
+
+	_, err = Db.Exec(cmd, s.Name, s.Description, s.Id)
+
+	return err
+}

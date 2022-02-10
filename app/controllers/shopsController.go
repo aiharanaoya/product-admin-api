@@ -39,7 +39,7 @@ func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		getShopById(w, id, http.StatusOK)
 	case http.MethodPut:
-		putShopById()
+		putShopById(w, r, id)
 	case http.MethodDelete:
 		deleteShopById()
 	default:
@@ -101,8 +101,29 @@ func postShop(w http.ResponseWriter, r *http.Request) {
 }
 
 // ショップ更新
-func putShopById() {
-	fmt.Println("ショップ更新処理")
+func putShopById(w http.ResponseWriter, r *http.Request, id string) {
+	var reqBody struct {
+		Name	string	`json:"name"`
+		Description	string	`json:"description"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	shop := models.Shop{
+		Id: id,
+		Name: reqBody.Name,
+		Description: reqBody.Description,
+	}
+
+	err = shop.UpdateShopById()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 更新したIDのショップを取得して返す
+	getShopById(w, id, http.StatusOK)
 }
 
 // ショップ削除

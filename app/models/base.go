@@ -19,16 +19,4 @@ func init() {
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	// 接続確認
-	// cmd := `
-	// 	insert into shops (name, description)
-	// 	values (?, ?)
-	// `
-
-	// _, err = Db.Exec(cmd, "ショップ名", "ショップ説明")
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
 }

@@ -11,7 +11,7 @@ import (
 
 // ハンドラ関数
 // URL、HTTPメソッドから呼び出す関数をハンドリングする。
-// 基本的にコントローラ関数を呼び出すのみで処理はコントローラ関数に記載する。
+// 基本的にコントローラ関数を呼び出すのみで処理dはコントローラ関数に記載する。
 
 // ショップハンドラ
 func shopsHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func shopsHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		getshops()
 	case http.MethodPost:
-		postShop()
+		postShop(w, r)
 	default:
 		// 仮エラーハンドリング
 		http.Error(w, "仮エラー", http.StatusInternalServerError)
@@ -59,8 +59,27 @@ func getshops() {
 }
 
 // ショップ作成
-func postShop() {
-	fmt.Println("ショップ作成処理")
+func postShop(w http.ResponseWriter, r *http.Request) {
+	var reqBody struct {
+		Name	string	`json:"name"`
+		Description	string	`json:"description"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		fmt.Println(err)
+	}
+	
+	shop := models.Shop{
+		Name: reqBody.Name,
+		Description: reqBody.Description,
+	}
+
+	err = shop.CreateShop()
+	if err != nil {
+		fmt.Println(err)
+	}
+	// 作成したIDじゃない
+	getShopById(w, shop.Id)
 }
 
 // ショップ取得

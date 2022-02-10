@@ -36,3 +36,15 @@ func FetchShopById(id string) (shop Shop, err error){
 
 	return shop, err
 }
+
+// ショップを作成する
+func (s *Shop) CreateShop() (err error) {
+	cmd := `
+		insert into shops (name, description)
+		values (?, ?)
+	`
+
+	_, err = Db.Exec(cmd, s.Name, s.Description)
+
+	return err
+}

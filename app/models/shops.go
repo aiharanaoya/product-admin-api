@@ -69,3 +69,16 @@ func (s *Shop) UpdateShopById() (err error) {
 
 	return err
 }
+
+// 指定IDのショップを削除する
+func DeleteShopById(id string) (err error) {
+	cmd := `
+		delete
+		from shops
+		where id = ? 
+	`
+
+	_, err = Db.Exec(cmd, id)
+
+	return err
+}

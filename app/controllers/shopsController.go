@@ -41,7 +41,7 @@ func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		putShopById(w, r, id)
 	case http.MethodDelete:
-		deleteShopById()
+		deleteShopById(w, id)
 	default:
 		// 仮エラーハンドリング
 		http.Error(w, "仮エラー", http.StatusInternalServerError)
@@ -127,8 +127,13 @@ func putShopById(w http.ResponseWriter, r *http.Request, id string) {
 }
 
 // ショップ削除
-func deleteShopById() {
-	fmt.Println("ショップ削除処理")
+func deleteShopById(w http.ResponseWriter, id string) {
+	err := models.DeleteShopById(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // ロジック切り出し

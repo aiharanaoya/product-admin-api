@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -38,13 +39,20 @@ func FetchShopById(id string) (shop Shop, err error){
 }
 
 // ショップを作成する
-func (s *Shop) CreateShop() (err error) {
+func (s *Shop) CreateShop() (id string, err error) {
 	cmd := `
 		insert into shops (name, description)
 		values (?, ?)
 	`
 
 	_, err = Db.Exec(cmd, s.Name, s.Description)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	return err
+	err = Db.QueryRow(`select last_insert_id()`).Scan(
+		&id,
+	)
+
+	return id, err
 }

@@ -37,7 +37,7 @@ func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		getShopById(w, id)
+		getShopById(w, id, http.StatusOK)
 	case http.MethodPut:
 		putShopById()
 	case http.MethodDelete:
@@ -58,32 +58,8 @@ func getshops() {
 	fmt.Println("ショップ一覧取得処理")
 }
 
-// ショップ作成
-func postShop(w http.ResponseWriter, r *http.Request) {
-	var reqBody struct {
-		Name	string	`json:"name"`
-		Description	string	`json:"description"`
-	}
-	err := json.NewDecoder(r.Body).Decode(&reqBody)
-	if err != nil {
-		fmt.Println(err)
-	}
-	
-	shop := models.Shop{
-		Name: reqBody.Name,
-		Description: reqBody.Description,
-	}
-
-	err = shop.CreateShop()
-	if err != nil {
-		fmt.Println(err)
-	}
-	// 作成したIDじゃない
-	getShopById(w, shop.Id)
-}
-
 // ショップ取得
-func getShopById(w http.ResponseWriter, id string) {
+func getShopById(w http.ResponseWriter, id string, statusCode int) {
 	shop, err := models.FetchShopById(id)
 	if err != nil {
 		fmt.Println(err)
@@ -95,7 +71,33 @@ func getShopById(w http.ResponseWriter, id string) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
 	fmt.Fprint(w, string(shopRes))
+}
+
+// ショップ作成
+func postShop(w http.ResponseWriter, r *http.Request) {
+	var reqBody struct {
+		Name	string	`json:"name"`
+		Description	string	`json:"description"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	shop := models.Shop{
+		Name: reqBody.Name,
+		Description: reqBody.Description,
+	}
+
+	id, err := shop.CreateShop()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 作成したIDのショップを取得して返す
+	getShopById(w, id, http.StatusCreated)
 }
 
 // ショップ更新

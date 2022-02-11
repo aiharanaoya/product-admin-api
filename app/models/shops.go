@@ -32,12 +32,18 @@ type ShopListRes struct {
 
 // ショップの検索を行う
 func SearchShops(page int, perPage int, name string) (shops []Shop, err error) {
+	// nameは部分一致
 	cmd := `
 		select id, name, description, created_at, updated_at
 		from shops
+		where name like concat('%', ?, '%')
+		limit ?
+		offset ?
 	`
 
-	rows, err := Db.Query(cmd)
+	offset := (page * perPage) - perPage
+
+	rows, err := Db.Query(cmd, name, perPage, offset)
 	if err != nil {
 		fmt.Println(err)
 	}

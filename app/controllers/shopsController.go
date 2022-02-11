@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/nao11aihara/product-admin-api/app/models"
@@ -17,7 +18,7 @@ import (
 func shopsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		getshops()
+		getshops(w, r)
 	case http.MethodPost:
 		postShop(w, r)
 	default:
@@ -29,7 +30,6 @@ func shopsHandler(w http.ResponseWriter, r *http.Request) {
 // ショップIDハンドラ
 func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 	id := getShopPathParameter(r)
-
 	if(id == "") {
 		// 仮エラーハンドリング
 		http.Error(w, "仮エラー", http.StatusInternalServerError)
@@ -54,8 +54,62 @@ func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 // DBのアクセス関数、レシーバメソッド、複雑になるロジックはモデル関数に定義する。
 
 // ショップ一覧取得
-func getshops() {
-	fmt.Println("ショップ一覧取得処理")
+func getshops(w http.ResponseWriter, r *http.Request) {
+	// クエリパラメータを取得
+	pageStr := r.FormValue("page")
+	perPageStr := r.FormValue("perPage")
+	name := r.FormValue("name")
+
+	// ページ、1ページあたりの件数の初期値
+	page := 1
+	perPage := 20
+	var err error
+
+	// ページ整数変換
+	if(pageStr != "") {
+		page, err = strconv.Atoi(pageStr)
+	}
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 1ページあたりの件数
+	if(perPageStr != "") {
+		perPage, err = strconv.Atoi(perPageStr)
+	}
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// ショップ検索
+	shops, err := models.SearchShops(page, perPage, name)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// ショップトータル件数取得
+	total, err := models.FetchShopsTotal()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// ショップ一覧取得レスポンスの形に変換
+	shopListRes := models.ShopListRes{
+		Shops: shops,
+		Pagination: models.Pagination{
+			Page: page,
+			PerPage: perPage,
+			Total: total,
+		},
+	}
+
+	shopListResJson, err := json.Marshal(shopListRes)
+	if err != nil {
+			fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(shopListResJson))
 }
 
 // ショップ取得

@@ -17,15 +17,69 @@ type Shop struct {
 	UpdatedAt	time.Time	`json:"updatedAt"`
 }
 
+// ページネーション構造体
+type Pagination struct {
+	Page	int	`json:"page"`
+	PerPage	int	`json:"perPage"`
+	Total	int	`json:"total"`
+}
+
+// ショップ一覧取得レスポンス構造体
+type ShopListRes struct {
+	Shops	[]Shop	`json:"shops"`
+	Pagination	Pagination `json:"pagination"`
+}
+
+// ショップの検索を行う
+func SearchShops(page int, perPage int, name string) (shops []Shop, err error) {
+	cmd := `
+		select id, name, description, created_at, updated_at
+		from shops
+	`
+
+	rows, err := Db.Query(cmd)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for rows.Next() {
+		var shop Shop
+		err = rows.Scan(
+			&shop.Id,
+			&shop.Name,
+			&shop.Description,
+			&shop.CreatedAt,
+			&shop.UpdatedAt,
+		)
+		if err != nil {
+			fmt.Println(err)
+		}
+		shops = append(shops, shop)
+	}
+	rows.Close()
+
+	return shops, err
+}
+
+// ショップのトータル件数を取得する
+func FetchShopsTotal() (total int, err error) {
+	cmd := `
+		select count(*)
+		from shops
+	`
+
+	err = Db.QueryRow(cmd).Scan(&total)
+
+	return total, err
+}
+
 // IDからショップ1件を取得する
-func FetchShopById(id string) (shop Shop, err error){
+func FetchShopById(id string) (shop Shop, err error) {
 	cmd := `
 		select id, name, description, created_at, updated_at
 		from shops
 		where id = ?
 	`
-
-	shop = Shop{}
 
 	err = Db.QueryRow(cmd, id).Scan(
 		&shop.Id,

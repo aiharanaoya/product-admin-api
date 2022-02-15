@@ -11,6 +11,11 @@ type HealthCheck struct {
 	Status string `json:"status"`
 }
 
+// エラー構造体
+type Error struct {
+	Status string `json:"status"`
+}
+
 // ルーティング設定
 func SetRouter() {
 	http.HandleFunc("/health_check", healthCheck)
@@ -42,7 +47,20 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, string(healthCheckRes))
 	} else {
-		// 仮エラーハンドリング
-		http.Error(w, "仮エラー", http.StatusInternalServerError)
+		ResponseError(w, http.StatusNotFound)
 	}
+}
+
+// エラーレスポンス
+func ResponseError(w http.ResponseWriter, statusCode int) {
+	error := Error{Status: http.StatusText(statusCode)}
+
+	errorRes, err := json.Marshal(error)
+	if err != nil {
+			fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	fmt.Fprint(w, string(errorRes))
 }

@@ -22,8 +22,7 @@ func shopsHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		postShop(w, r)
 	default:
-		// 仮エラーハンドリング
-		http.Error(w, "仮エラー", http.StatusInternalServerError)
+		ResponseError(w, http.StatusNotFound)
 	}
 }
 
@@ -31,8 +30,7 @@ func shopsHandler(w http.ResponseWriter, r *http.Request) {
 func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 	id := getShopPathParameter(r)
 	if(id == "") {
-		// 仮エラーハンドリング
-		http.Error(w, "仮エラー", http.StatusInternalServerError)
+		ResponseError(w, http.StatusNotFound)
 	}
 
 	switch r.Method {
@@ -43,8 +41,7 @@ func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		deleteShopById(w, id)
 	default:
-		// 仮エラーハンドリング
-		http.Error(w, "仮エラー", http.StatusInternalServerError)
+		ResponseError(w, http.StatusNotFound)
 	}
 }
 

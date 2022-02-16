@@ -28,18 +28,13 @@ func shopsHandler(w http.ResponseWriter, r *http.Request) {
 
 // ショップIDハンドラ
 func shopsIdHandler(w http.ResponseWriter, r *http.Request) {
-	id := getShopPathParameter(r)
-	if(id == "") {
-		ResponseError(w, http.StatusNotFound)
-	}
-
 	switch r.Method {
 	case http.MethodGet:
-		getShopById(w, id, http.StatusOK)
+		getShopById(w, r)
 	case http.MethodPut:
-		putShopById(w, r, id)
+		putShopById(w, r)
 	case http.MethodDelete:
-		deleteShopById(w, id)
+		deleteShopById(w, r)
 	default:
 		ResponseError(w, http.StatusNotFound)
 	}
@@ -68,26 +63,34 @@ func getshops(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusBadRequest)
+		return
 	}
 
-	// 1ページあたりの件数
+	// 1ページあたりの件数整数変換
 	if(perPageStr != "") {
 		perPage, err = strconv.Atoi(perPageStr)
 	}
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusBadRequest)
+		return
 	}
 
 	// ショップ検索
 	shops, err := models.SearchShops(page, perPage, name)
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
 	// ショップトータル件数取得
 	total, err := models.FetchShopsTotal()
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
 	// ショップ一覧取得レスポンスの形に変換
@@ -110,19 +113,29 @@ func getshops(w http.ResponseWriter, r *http.Request) {
 }
 
 // ショップ取得
-func getShopById(w http.ResponseWriter, id string, statusCode int) {
+func getShopById(w http.ResponseWriter, r *http.Request) {
+	id := getShopPathParameter(r)
+	if(id == "") {
+		ResponseError(w, http.StatusBadRequest)
+		return
+	}
+
 	shop, err := models.FetchShopById(id)
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
 	shopRes, err := json.Marshal(shop)
 	if err != nil {
 			fmt.Println(err)
+			ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, string(shopRes))
 }
 
@@ -135,6 +148,8 @@ func postShop(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
 	shop := models.Shop{
@@ -145,18 +160,43 @@ func postShop(w http.ResponseWriter, r *http.Request) {
 	id, err := shop.CreateShop()
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
-	// 作成したIDのショップを取得して返す
-	getShopById(w, id, http.StatusCreated)
+	// 作成したIDのショップを取得
+	shop, err = models.FetchShopById(id)
+	if err != nil {
+		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
+	}
+
+	shopRes, err := json.Marshal(shop)
+	if err != nil {
+		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprint(w, string(shopRes))
 }
 
 // ショップ更新
-func putShopById(w http.ResponseWriter, r *http.Request, id string) {
+func putShopById(w http.ResponseWriter, r *http.Request) {
+	id := getShopPathParameter(r)
+	if(id == "") {
+		ResponseError(w, http.StatusBadRequest)
+		return
+	}
+
 	var reqBody struct {
 		Name	string	`json:"name"`
 		Description	string	`json:"description"`
 	}
+
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
 	if err != nil {
 		fmt.Println(err)
@@ -171,17 +211,43 @@ func putShopById(w http.ResponseWriter, r *http.Request, id string) {
 	err = shop.UpdateShopById()
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
-	// 更新したIDのショップを取得して返す
-	getShopById(w, id, http.StatusOK)
+	// 更新したIDのショップを取得
+	shop, err = models.FetchShopById(id)
+	if err != nil {
+		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
+	}
+
+	shopRes, err := json.Marshal(shop)
+	if err != nil {
+		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, string(shopRes))
 }
 
 // ショップ削除
-func deleteShopById(w http.ResponseWriter, id string) {
+func deleteShopById(w http.ResponseWriter, r *http.Request) {
+	id := getShopPathParameter(r)
+	if(id == "") {
+		ResponseError(w, http.StatusBadRequest)
+		return
+	}
+
 	err := models.DeleteShopById(id)
 	if err != nil {
 		fmt.Println(err)
+		ResponseError(w, http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)

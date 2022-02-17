@@ -152,6 +152,18 @@ func postShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO 仮簡易バリデーション
+	if reqBody.Name == "" || reqBody.Description == "" {
+		fmt.Println("必須パラメータ")
+		ResponseError(w, http.StatusUnprocessableEntity)
+		return
+	}
+	if len(reqBody.Name) > 100 || len(reqBody.Description) == 2000 {
+		fmt.Println("文字上限")
+		ResponseError(w, http.StatusUnprocessableEntity)
+		return
+	}
+
 	shop := models.Shop{
 		Name: reqBody.Name,
 		Description: reqBody.Description,

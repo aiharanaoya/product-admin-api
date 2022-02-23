@@ -23,6 +23,11 @@ func SetRouter() {
 	// ショップ
 	http.HandleFunc("/api/shops", shopsHandler)
 	http.HandleFunc("/api/shops/", shopsIdHandler)
+
+	// ユーザー
+	http.HandleFunc("/api/users", usersHandler)
+	http.HandleFunc("/api/users/login", usersLoginHandler)
+	http.HandleFunc("/api/users/logout", usersLogoutHandler)
 }
 
 // サーバーを起動する

@@ -15,6 +15,8 @@ import (
 // ユーザーハンドラ
 func usersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	case http.MethodGet:
+		getUser(w, r)
 	case http.MethodPost:
 		postUser(w, r)
 	default:
@@ -46,6 +48,29 @@ func usersLogoutHandler(w http.ResponseWriter, r *http.Request) {
 // それぞれのAPIに対応した関数。
 // モデル関数で定義した構造体の呼び出し、JSONの変換処理等を行う。
 // DBのアクセス関数、レシーバメソッド、複雑になるロジックはモデル関数に定義する。
+
+// ユーザー取得
+func getUser(w http.ResponseWriter, r *http.Request) {
+	sessionId := r.Header.Get("sessionId")
+	if sessionId == "" {
+		ResponseError(w, http.StatusBadRequest)
+	}
+
+	userRes, err := models.GetUser(sessionId)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// JSON変換
+	userResJson, err := json.Marshal(userRes)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, string(userResJson))
+}
 
 // ユーザー登録
 func postUser(w http.ResponseWriter, r *http.Request) {

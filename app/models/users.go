@@ -25,6 +25,42 @@ type UserRes struct {
 	UpdatedAt	time.Time	`json:"updatedAt"`
 }
 
+// ユーザーを取得する
+func GetUser(sessionId string) (userRes UserRes, err error) {
+	userRes.SessionId = sessionId
+
+	// セッションIDからユーザーIDを取得する
+	cmd := `
+		select user_id
+		from login_sessions
+		where session_id = ?
+		limit 1
+	`
+
+	err = Db.QueryRow(cmd, sessionId).Scan(
+		&userRes.UserId,
+	)
+
+	if err != nil {
+		fmt.Println(err)
+		return userRes, err
+	}
+
+	// ユーザーIDからユーザーを取得する
+	cmd = `
+		select created_at, updated_at
+		from users
+		where user_id = ?
+	`
+
+	err = Db.QueryRow(cmd, userRes.UserId).Scan(
+		&userRes.CreatedAt,
+		&userRes.UpdatedAt,
+	)
+
+	return userRes, err
+}
+
 // ユーザーを登録する
 func (u *UserReq) RegisterUser() (userRes UserRes, err error) {
 	cmd := `

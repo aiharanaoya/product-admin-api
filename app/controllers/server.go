@@ -24,6 +24,10 @@ func SetRouter() {
 	http.HandleFunc("/api/shops", shopsHandler)
 	http.HandleFunc("/api/shops/", shopsIdHandler)
 
+	// 商品
+	http.HandleFunc("/api/products", productsHandler)
+	http.HandleFunc("/api/products/", productsIdHandler)
+
 	// ユーザー
 	http.HandleFunc("/api/users", usersHandler)
 	http.HandleFunc("/api/users/login", usersLoginHandler)

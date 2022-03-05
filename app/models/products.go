@@ -17,13 +17,6 @@ type Product struct {
 	UpdatedAt	time.Time	`json:"updatedAt"`
 }
 
-// ページネーション構造体
-type Pagination struct {
-	Page	int	`json:"page"`
-	PerPage	int	`json:"perPage"`
-	Total	int	`json:"total"`
-}
-
 // 商品一覧取得レスポンス構造体
 type ProductListRes struct {
 	Products	[]Product	`json:"products"`

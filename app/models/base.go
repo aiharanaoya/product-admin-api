@@ -20,3 +20,10 @@ func init() {
 		fmt.Println(err)
 	}
 }
+
+// ページネーション構造体
+type Pagination struct {
+	Page	int	`json:"page"`
+	PerPage	int	`json:"perPage"`
+	Total	int	`json:"total"`
+}

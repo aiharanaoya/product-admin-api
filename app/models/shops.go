@@ -17,13 +17,6 @@ type Shop struct {
 	UpdatedAt	time.Time	`json:"updatedAt"`
 }
 
-// ページネーション構造体
-type Pagination struct {
-	Page	int	`json:"page"`
-	PerPage	int	`json:"perPage"`
-	Total	int	`json:"total"`
-}
-
 // ショップ一覧取得レスポンス構造体
 type ShopListRes struct {
 	Shops	[]Shop	`json:"shops"`

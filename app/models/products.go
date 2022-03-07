@@ -124,7 +124,7 @@ func (s *Product) UpdateProductById() (err error) {
 		where id = ?
 	`
 
-	_, err = Db.Exec(cmd, s.Name, s.Description, s.Id)
+	_, err = Db.Exec(cmd, s.Title, s.Price, s.Description, s.ShopId, s.Id)
 
 	return err
 }

@@ -50,7 +50,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	// クエリパラメータを取得
 	pageStr := r.FormValue("page")
 	perPageStr := r.FormValue("perPage")
-	name := r.FormValue("name")
+	title := r.FormValue("title")
 
 	// ページ、1ページあたりの件数の初期値
 	page := 1
@@ -78,7 +78,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 商品検索
-	prodcuts, err := models.SearchProducts(page, perPage, name)
+	prodcuts, err := models.SearchProducts(page, perPage, title)
 	if err != nil {
 		fmt.Println(err)
 		ResponseError(w, http.StatusInternalServerError)
@@ -105,7 +105,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 
 	prodcutListResJson, err := json.Marshal(prodcutListRes)
 	if err != nil {
-			fmt.Println(err)
+		fmt.Println(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -142,8 +142,10 @@ func getProductById(w http.ResponseWriter, r *http.Request) {
 // 商品作成
 func postProduct(w http.ResponseWriter, r *http.Request) {
 	var reqBody struct {
-		Name	string	`json:"name"`
+		Title	string	`json:"title"`
+		Price	int	`json:"price"`
 		Description	string	`json:"description"`
+		ShopId	string	`json:"shopId"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
 	if err != nil {
@@ -153,20 +155,22 @@ func postProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 仮簡易バリデーション
-	if reqBody.Name == "" || reqBody.Description == "" {
+	if reqBody.Title == "" || reqBody.Description == "" || reqBody.ShopId == ""{
 		fmt.Println("必須パラメータ")
 		ResponseError(w, http.StatusUnprocessableEntity)
 		return
 	}
-	if len(reqBody.Name) > 100 || len(reqBody.Description) == 2000 {
+	if len(reqBody.Title) > 100 || len(reqBody.Description) > 2000 {
 		fmt.Println("文字上限")
 		ResponseError(w, http.StatusUnprocessableEntity)
 		return
 	}
 
 	prodcut := models.Product{
-		Name: reqBody.Name,
+		Title: reqBody.Title,
+		Price: reqBody.Price,
 		Description: reqBody.Description,
+		ShopId: reqBody.ShopId,
 	}
 
 	id, err := prodcut.CreateProduct()
@@ -205,8 +209,10 @@ func putProductById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var reqBody struct {
-		Name	string	`json:"name"`
+		Title	string	`json:"title"`
+		Price	int	`json:"price"`
 		Description	string	`json:"description"`
+		ShopId	string	`json:"shopId"`
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
@@ -215,9 +221,10 @@ func putProductById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	prodcut := models.Product{
-		Id: id,
-		Name: reqBody.Name,
+		Title: reqBody.Title,
+		Price: reqBody.Price,
 		Description: reqBody.Description,
+		ShopId: reqBody.ShopId,
 	}
 
 	err = prodcut.UpdateProductById()

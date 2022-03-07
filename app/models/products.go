@@ -11,8 +11,10 @@ import (
 // 商品構造体
 type Product struct {
 	Id	string	`json:"id"`
-	Name	string	`json:"name"`
+	Title	string	`json:"title"`
+	Price	int	`json:"price"`
 	Description	string	`json:"description"`
+	ShopId	string	`json:"shopId"`
 	CreatedAt	time.Time	`json:"createdAt"`
 	UpdatedAt	time.Time	`json:"updatedAt"`
 }
@@ -24,19 +26,19 @@ type ProductListRes struct {
 }
 
 // 商品の検索を行う
-func SearchProducts(page int, perPage int, name string) (products []Product, err error) {
-	// nameは部分一致
+func SearchProducts(page int, perPage int, title string) (products []Product, err error) {
+	// titleは部分一致
 	cmd := `
-		select id, name, description, created_at, updated_at
+		select id, title, price, description, shopId, created_at, updated_at
 		from products
-		where name like concat('%', ?, '%')
+		where title like concat('%', ?, '%')
 		limit ?
 		offset ?
 	`
 
 	offset := (page * perPage) - perPage
 
-	rows, err := Db.Query(cmd, name, perPage, offset)
+	rows, err := Db.Query(cmd, title, perPage, offset)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -45,8 +47,10 @@ func SearchProducts(page int, perPage int, name string) (products []Product, err
 		var product Product
 		err = rows.Scan(
 			&product.Id,
-			&product.Name,
+			&product.Title,
+			&product.Price,
 			&product.Description,
+			&product.ShopId,
 			&product.CreatedAt,
 			&product.UpdatedAt,
 		)
@@ -75,17 +79,19 @@ func FetchProductsTotal() (total int, err error) {
 // IDから商品1件を取得する
 func FetchProductById(id string) (product Product, err error) {
 	cmd := `
-		select id, name, description, created_at, updated_at
+		select id, title, price, description, shopId, created_at, updated_at
 		from products
 		where id = ?
 	`
 
 	err = Db.QueryRow(cmd, id).Scan(
 		&product.Id,
-		&product.Name,
-		&product.Description,
-		&product.CreatedAt,
-		&product.UpdatedAt,
+			&product.Title,
+			&product.Price,
+			&product.Description,
+			&product.ShopId,
+			&product.CreatedAt,
+			&product.UpdatedAt,
 	)
 
 	return product, err
@@ -94,11 +100,11 @@ func FetchProductById(id string) (product Product, err error) {
 // 商品を作成する
 func (s *Product) CreateProduct() (id string, err error) {
 	cmd := `
-		insert into products (name, description)
-		values (?, ?)
+		insert into products (title, price, description, shopId)
+		values (?, ?, ?, ?)
 	`
 
-	_, err = Db.Exec(cmd, s.Name, s.Description)
+	_, err = Db.Exec(cmd, s.Title, s.Price, s.Description, s.ShopId)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -114,8 +120,8 @@ func (s *Product) CreateProduct() (id string, err error) {
 func (s *Product) UpdateProductById() (err error) {
 	cmd := `
 		update products
-		set name = ?, description = ?
-		where id = ? 
+		set title = ?, price = ?, description = ?, shopId = ?,
+		where id = ?
 	`
 
 	_, err = Db.Exec(cmd, s.Name, s.Description, s.Id)

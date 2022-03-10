@@ -20,7 +20,7 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		postUser(w, r)
 	default:
-		ResponseError(w, http.StatusNotFound)
+		ResponseCommonError(w, http.StatusNotFound, "そのURLは存在しません。")
 	}
 }
 
@@ -30,7 +30,7 @@ func usersLoginHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		postUserLogin(w, r)
 	default:
-		ResponseError(w, http.StatusNotFound)
+		ResponseCommonError(w, http.StatusNotFound, "そのURLは存在しません。")
 	}
 }
 
@@ -40,7 +40,7 @@ func usersLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		deleteUserLogout(w, r)
 	default:
-		ResponseError(w, http.StatusNotFound)
+		ResponseCommonError(w, http.StatusNotFound, "そのURLは存在しません。")
 	}
 }
 
@@ -53,7 +53,7 @@ func usersLogoutHandler(w http.ResponseWriter, r *http.Request) {
 func getUser(w http.ResponseWriter, r *http.Request) {
 	sessionId := r.Header.Get("sessionId")
 	if sessionId == "" {
-		ResponseError(w, http.StatusBadRequest)
+		ResponseCommonError(w, http.StatusBadRequest, "不正なリクエストです。")
 	}
 
 	userRes, err := models.GetUser(sessionId)
@@ -122,8 +122,7 @@ func postUserLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !isOk {
-		// 仮
-		http.Error(w, "ログイン失敗", http.StatusUnauthorized)
+		ResponseCommonError(w, http.StatusUnauthorized, "認証エラー")
 		return
 	}
 
@@ -138,7 +137,7 @@ func postUserLogin(w http.ResponseWriter, r *http.Request) {
 	// JSON変換
 	userResJson, err := json.Marshal(userRes)
 	if err != nil {
-			fmt.Println(err)
+		fmt.Println(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -150,7 +149,7 @@ func postUserLogin(w http.ResponseWriter, r *http.Request) {
 func deleteUserLogout(w http.ResponseWriter, r *http.Request) {
 	sessionId := r.Header.Get("sessionId")
 	if sessionId == "" {
-		ResponseError(w, http.StatusBadRequest)
+		ResponseCommonError(w, http.StatusBadRequest, "不正なリクエストです。")
 	}
 
 	err := 	models.Logout(sessionId)

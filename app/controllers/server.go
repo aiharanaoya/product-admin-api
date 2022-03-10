@@ -11,9 +11,9 @@ type HealthCheck struct {
 	Status string `json:"status"`
 }
 
-// エラー構造体
-type Error struct {
-	Status string `json:"status"`
+// 共通エラー構造体
+type CommonError struct {
+	Message string `json:"message"`
 }
 
 // ルーティング設定
@@ -56,17 +56,17 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, string(healthCheckRes))
 	} else {
-		ResponseError(w, http.StatusNotFound)
+		ResponseCommonError(w, http.StatusNotFound, "そのURLは存在しません。")
 	}
 }
 
-// エラーレスポンス
-func ResponseError(w http.ResponseWriter, statusCode int) {
-	error := Error{Status: http.StatusText(statusCode)}
+// 共通エラーレスポンス
+func ResponseCommonError(w http.ResponseWriter, statusCode int, message string) {
+	error := CommonError{Message: message}
 
 	errorRes, err := json.Marshal(error)
 	if err != nil {
-			fmt.Println(err)
+		fmt.Println(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

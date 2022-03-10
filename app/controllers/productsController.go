@@ -22,7 +22,7 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		postProduct(w, r)
 	default:
-		ResponseError(w, http.StatusNotFound)
+		ResponseCommonError(w, http.StatusNotFound, "そのURLは存在しません。")
 	}
 }
 
@@ -36,7 +36,7 @@ func productsIdHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		deleteProductById(w, r)
 	default:
-		ResponseError(w, http.StatusNotFound)
+		ResponseCommonError(w, http.StatusNotFound, "そのURLは存在しません。")
 	}
 }
 
@@ -63,7 +63,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusBadRequest)
+		ResponseCommonError(w, http.StatusBadRequest, "不正なリクエストです。")
 		return
 	}
 
@@ -73,7 +73,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusBadRequest)
+		ResponseCommonError(w, http.StatusBadRequest, "不正なリクエストです。")
 		return
 	}
 
@@ -81,7 +81,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	prodcuts, err := models.SearchProducts(page, perPage, title)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
@@ -89,7 +89,7 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 	total, err := models.FetchProductsTotal()
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
@@ -116,21 +116,21 @@ func getProducts(w http.ResponseWriter, r *http.Request) {
 func getProductById(w http.ResponseWriter, r *http.Request) {
 	id := getProductPathParameter(r)
 	if(id == "") {
-		ResponseError(w, http.StatusBadRequest)
+		ResponseCommonError(w, http.StatusBadRequest, "不正なリクエストです。")
 		return
 	}
 
 	prodcut, err := models.FetchProductById(id)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
 	prodcutRes, err := json.Marshal(prodcut)
 	if err != nil {
 			fmt.Println(err)
-			ResponseError(w, http.StatusInternalServerError)
+			ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
@@ -150,19 +150,19 @@ func postProduct(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&reqBody)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
 	// TODO 仮簡易バリデーション
 	if reqBody.Title == "" || reqBody.Description == "" || reqBody.ShopId == ""{
 		fmt.Println("必須パラメータ")
-		ResponseError(w, http.StatusUnprocessableEntity)
+		ResponseCommonError(w, http.StatusUnprocessableEntity, "パラメータが不正です。")
 		return
 	}
 	if len(reqBody.Title) > 100 || len(reqBody.Description) > 2000 {
 		fmt.Println("文字上限")
-		ResponseError(w, http.StatusUnprocessableEntity)
+		ResponseCommonError(w, http.StatusUnprocessableEntity, "パラメータが不正です。")
 		return
 	}
 
@@ -176,7 +176,7 @@ func postProduct(w http.ResponseWriter, r *http.Request) {
 	id, err := prodcut.CreateProduct()
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
@@ -184,14 +184,14 @@ func postProduct(w http.ResponseWriter, r *http.Request) {
 	prodcut, err = models.FetchProductById(id)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
 	prodcutRes, err := json.Marshal(prodcut)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
@@ -204,7 +204,7 @@ func postProduct(w http.ResponseWriter, r *http.Request) {
 func putProductById(w http.ResponseWriter, r *http.Request) {
 	id := getProductPathParameter(r)
 	if(id == "") {
-		ResponseError(w, http.StatusBadRequest)
+		ResponseCommonError(w, http.StatusBadRequest, "不正なリクエストです。")
 		return
 	}
 
@@ -230,7 +230,7 @@ func putProductById(w http.ResponseWriter, r *http.Request) {
 	err = prodcut.UpdateProductById()
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
@@ -238,14 +238,14 @@ func putProductById(w http.ResponseWriter, r *http.Request) {
 	prodcut, err = models.FetchProductById(id)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
 	prodcutRes, err := json.Marshal(prodcut)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 
@@ -258,14 +258,14 @@ func putProductById(w http.ResponseWriter, r *http.Request) {
 func deleteProductById(w http.ResponseWriter, r *http.Request) {
 	id := getProductPathParameter(r)
 	if(id == "") {
-		ResponseError(w, http.StatusBadRequest)
+		ResponseCommonError(w, http.StatusBadRequest, "不正なリクエストです。")
 		return
 	}
 
 	err := models.DeleteProductById(id)
 	if err != nil {
 		fmt.Println(err)
-		ResponseError(w, http.StatusInternalServerError)
+		ResponseCommonError(w, http.StatusInternalServerError, "サーバーエラー")
 		return
 	}
 

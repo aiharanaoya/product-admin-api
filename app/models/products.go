@@ -29,7 +29,7 @@ type ProductListRes struct {
 func SearchProducts(page int, perPage int, title string) (products []Product, err error) {
 	// titleは部分一致
 	cmd := `
-		select id, title, price, description, shopId, created_at, updated_at
+		select id, title, price, description, shop_id, created_at, updated_at
 		from products
 		where title like concat('%', ?, '%')
 		limit ?
@@ -100,7 +100,7 @@ func FetchProductById(id string) (product Product, err error) {
 // 商品を作成する
 func (s *Product) CreateProduct() (id string, err error) {
 	cmd := `
-		insert into products (title, price, description, shopId)
+		insert into products (title, price, description, shop_id)
 		values (?, ?, ?, ?)
 	`
 
@@ -120,7 +120,7 @@ func (s *Product) CreateProduct() (id string, err error) {
 func (s *Product) UpdateProductById() (err error) {
 	cmd := `
 		update products
-		set title = ?, price = ?, description = ?, shopId = ?,
+		set title = ?, price = ?, description = ?, shop_id = ?,
 		where id = ?
 	`
 
